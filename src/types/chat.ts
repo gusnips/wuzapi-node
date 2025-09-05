@@ -109,7 +109,8 @@ export interface DownloadMediaRequest {
 }
 
 export interface DownloadMediaResponse {
-  [key: string]: unknown; // Base64 encoded media data
+  Data: string;
+  Mimetype: string;
 }
 
 export interface DeleteMessageRequest {
