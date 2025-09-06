@@ -29,9 +29,7 @@ export class BaseClient {
     this.config = config;
     this.axios = axios.create({
       baseURL: config.apiUrl,
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: this.defaultHeaders,
     });
 
     // Add response interceptor for error handling
@@ -63,22 +61,22 @@ export class BaseClient {
    */
   private buildHeaders(options?: RequestOptions): Record<string, string> {
     const token = options?.token || this.config.token;
+    const headers = {
+      ...this.defaultHeaders,
+    };
     if (!token) {
       throw new WuzapiError(
         401,
         "No authentication token provided. Either set a token in the client config or provide one in the request options."
       );
     }
-    if (options?.token) {
-      return {
-        ...this.defaultHeaders,
-        Token: options.token,
-      };
+    if (options?.token && options.token !== this.config.token) {
+      headers.Token = options.token;
     }
-    return {
-      ...this.defaultHeaders,
-      Authorization: token,
-    };
+    if (this.config.token) {
+      headers.Authorization = this.config.token;
+    }
+    return headers;
   }
 
   protected async request<T>(
