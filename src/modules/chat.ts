@@ -23,6 +23,7 @@ import {
   SendPollRequest,
   EditMessageRequest,
   ListSection,
+  GetChatHistoryResponse,
 } from "../types/chat.js";
 
 export class ChatModule extends BaseClient {
@@ -310,5 +311,25 @@ export class ChatModule extends BaseClient {
       Body: newBody,
     };
     return this.post<SendMessageResponse>("/chat/send/edit", request, options);
+  }
+
+  /**
+   * Get chat message history
+   */
+  async getChatHistory(
+    chatJid: string,
+    limit?: number,
+    options?: RequestOptions
+  ): Promise<GetChatHistoryResponse> {
+    const queryParams: string[] = [`chat_jid=${encodeURIComponent(chatJid)}`];
+
+    if (limit !== undefined) {
+      queryParams.push(`limit=${limit}`);
+    }
+
+    return this.get<GetChatHistoryResponse>(
+      `/chat/history?${queryParams.join("&")}`,
+      options
+    );
   }
 }

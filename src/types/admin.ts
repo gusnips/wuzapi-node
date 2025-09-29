@@ -19,6 +19,7 @@ export interface User {
   s3_config: S3ConfigResponse;
   token: string;
   webhook: string;
+  history: number;
 }
 
 export interface CreateUserRequest {

@@ -485,6 +485,28 @@ await client.chat.sendPresence({
 });
 ```
 
+### Chat History
+
+```typescript
+// Get chat message history (requires message history to be enabled on server)
+const history = await client.chat.getChatHistory(
+  "5491155553333@s.whatsapp.net", // Chat JID
+  100 // Optional: limit (default 50, max 1000)
+);
+
+// History contains array of messages in reverse chronological order (newest first)
+history.data.forEach((message) => {
+  console.log(`Message ${message.id}:`);
+  console.log(`From: ${message.sender_jid}`);
+  console.log(`Time: ${message.timestamp}`);
+  console.log(`Type: ${message.message_type}`);
+  console.log(`Content: ${message.text_content}`);
+  if (message.media_link) {
+    console.log(`Media: ${message.media_link}`);
+  }
+});
+```
+
 ### Location and Contacts
 
 ```typescript
@@ -1338,6 +1360,7 @@ MIT License - see the [LICENSE](LICENSE) file for details.
 
 ### Latest Updates
 
+- ✅ **Chat History**: Added chat history new endpoint
 - ✅ **Phone Pairing**: Alternative to QR code login
 - ✅ **Interactive Messages**: Buttons, lists, and polls
 - ✅ **Message Management**: Edit and delete messages

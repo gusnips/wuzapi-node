@@ -175,3 +175,24 @@ export interface EditMessageRequest {
   Phone: string;
   Body: string;
 }
+
+export interface GetChatHistoryRequest {
+  Chat: string; // chat_jid parameter
+  Limit?: number;
+}
+
+export interface HistoryMessage {
+  id: number;
+  user_id: string;
+  chat_jid: string;
+  sender_jid: string;
+  message_id: string;
+  timestamp: string;
+  message_type: string;
+  text_content: string;
+  media_link: string;
+}
+
+export interface GetChatHistoryResponse {
+  data: HistoryMessage[];
+}
