@@ -182,15 +182,15 @@ export interface GetChatHistoryRequest {
 }
 
 export interface HistoryMessage {
-  id: number;
-  user_id: string;
-  chat_jid: string;
-  sender_jid: string;
-  message_id: string;
-  timestamp: string;
-  message_type: string;
-  text_content: string;
-  media_link: string;
+  ID: string;
+  UserID: string;
+  ChatJID: string;
+  SenderJID: string;
+  MessageID: string;
+  Timestamp: string;
+  MessageType: string;
+  TextContent: string;
+  MediaLink?: string;
 }
 
 export interface GetChatHistoryResponse {
