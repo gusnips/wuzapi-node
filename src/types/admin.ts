@@ -43,6 +43,7 @@ export interface CreateUserRequest {
     mediaDelivery: "base64" | "s3" | "both";
     retentionDays: number;
   };
+  history?: number; // Number of messages to save in the database, defaults to 0, which is disabled
 }
 
 export interface CreateUserResponse {
@@ -66,6 +67,7 @@ export interface CreateUserResponse {
     region: string;
     retention_days: number;
   };
+  history?: number; // Number of messages to save in the database, defaults to 0, which is disabled
 }
 
 export interface DeleteUserResponse {
