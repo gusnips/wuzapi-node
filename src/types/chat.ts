@@ -193,6 +193,4 @@ export interface HistoryMessage {
   user_id: string;
 }
 
-export interface GetChatHistoryResponse {
-  data: HistoryMessage[];
-}
+export type GetChatHistoryResponse = HistoryMessage[];
