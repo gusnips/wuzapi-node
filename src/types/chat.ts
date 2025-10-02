@@ -92,6 +92,11 @@ export interface MarkReadRequest {
   Sender?: string;
 }
 
+export interface MarkReadResponse {
+  Details: string;
+  success: boolean;
+}
+
 export interface ReactRequest {
   Phone: string;
   Body: string;

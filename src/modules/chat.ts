@@ -13,6 +13,7 @@ import {
   SendContactRequest,
   ChatPresenceRequest,
   MarkReadRequest,
+  MarkReadResponse,
   ReactRequest,
   DownloadMediaRequest,
   DownloadMediaResponse,
@@ -153,8 +154,8 @@ export class ChatModule extends BaseClient {
   async markRead(
     request: MarkReadRequest,
     options?: RequestOptions
-  ): Promise<void> {
-    await this.post<void>("/chat/markread", request, options);
+  ): Promise<MarkReadResponse> {
+    return this.post<MarkReadResponse>("/chat/markread", request, options);
   }
 
   /**
