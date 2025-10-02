@@ -95,7 +95,7 @@ export interface MarkReadRequest {
 export interface ReactRequest {
   Phone: string;
   Body: string;
-  id: string;
+  Id: string;
 }
 
 export interface DownloadMediaRequest {
