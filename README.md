@@ -471,12 +471,12 @@ await client.chat.editMessage(
 await client.chat.react({
   Phone: "5491155554444",
   Body: "❤️",
-  Id: "message-id-to-react-to",
+  id: "message-id-to-react-to",
 });
 
 // Mark messages as read
 await client.chat.markRead({
-  Id: ["message-id-1", "message-id-2"],
+  id: ["message-id-1", "message-id-2"],
   Chat: "5491155553934@s.whatsapp.net",
 });
 
