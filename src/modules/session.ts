@@ -12,6 +12,8 @@ import {
   HistoryResponse,
   ProxyRequest,
   ProxyResponse,
+  HistoryCountRequest,
+  HistoryCountResponse,
 } from "../types/session.js";
 import { S3Config, RequestOptions, S3ConfigResponse } from "../types/common.js";
 
@@ -105,6 +107,21 @@ export class SessionModule extends BaseClient {
    */
   async requestHistory(options?: RequestOptions): Promise<HistoryResponse> {
     return this.get<HistoryResponse>("/session/history", options);
+  }
+
+  /**
+   * Set history count for WhatsApp synchronization
+   */
+  async setHistoryCount(
+    history: number,
+    options?: RequestOptions
+  ): Promise<HistoryCountResponse> {
+    const request: HistoryCountRequest = { history };
+    return this.post<HistoryCountResponse>(
+      "/session/history",
+      request,
+      options
+    );
   }
 
   /**

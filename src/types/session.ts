@@ -71,3 +71,12 @@ export interface ProxyRequest {
 export interface ProxyResponse {
   Details: string;
 }
+
+export interface HistoryCountRequest {
+  history: number;
+}
+
+export interface HistoryCountResponse {
+  Details: string;
+  History: number;
+}

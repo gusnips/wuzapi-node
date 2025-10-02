@@ -320,6 +320,9 @@ await client.session.requestHistory();
 
 // Configure proxy
 await client.session.setProxy("socks5://user:pass@proxy:port", true);
+
+// Set historyfor user
+await client.session.setHistoryCount(100); // use 0 for disabled
 ```
 
 ### S3 Storage
@@ -676,6 +679,7 @@ const newUser = await client.admin.addUser(
       mediaDelivery: "both",
       retentionDays: 30,
     },
+    history: 20, // Number of messages to save in the database, defaults to 0, which is disabled
   },
   { token: "admin-token" }
 );
