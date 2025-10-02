@@ -87,7 +87,7 @@ export interface ChatPresenceRequest {
 }
 
 export interface MarkReadRequest {
-  Id: string[];
+  id: string[];
   Chat: string;
   Sender?: string;
 }
