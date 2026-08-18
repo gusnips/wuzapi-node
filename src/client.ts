@@ -37,6 +37,11 @@ export class BaseClient {
   protected defaultHeaders: Record<string, string> = {
     "Content-Type": "application/json",
   };
+  /**
+   * Which credential this module's endpoints authenticate with. Overridden to
+   * `"admin"` by `AdminModule`; every other module is on user auth.
+   */
+  protected readonly authScheme: "user" | "admin" = "user";
 
   constructor(config: WuzapiConfig) {
     this.config = config;
@@ -69,27 +74,29 @@ export class BaseClient {
   }
 
   /**
-   * Resolve the token from request options or instance config
-   * Throws an error if no token is available
+   * Build the auth header the endpoint requires. WuzAPI reads `token` on user
+   * routes and `Authorization` on `/admin/*`, and never falls back from one to
+   * the other — so the header is fixed by the module's scheme, and
+   * `options.token` only overrides which credential goes in it.
    */
   private buildHeaders(options?: RequestOptions): Record<string, string> {
-    const token = options?.token || this.config.token;
-    const headers = {
-      ...this.defaultHeaders,
-    };
+    const isAdmin = this.authScheme === "admin";
+    const token =
+      options?.token ?? (isAdmin ? this.config.adminToken : this.config.token);
+
     if (!token) {
       throw new WuzapiError(
         401,
-        "No authentication token provided. Either set a token in the client config or provide one in the request options."
+        isAdmin
+          ? "No admin token provided. Set `adminToken` in the client config, or pass `{ token }` in the request options."
+          : "No user token provided. Set `token` in the client config, or pass `{ token }` in the request options."
       );
     }
-    if (options?.token && options.token !== this.config.token) {
-      headers.Token = options.token;
-    }
-    if (this.config.token) {
-      headers.Authorization = this.config.token;
-    }
-    return headers;
+
+    return {
+      ...this.defaultHeaders,
+      [isAdmin ? "Authorization" : "token"]: token,
+    };
   }
 
   protected async request<T>(

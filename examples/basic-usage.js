@@ -4,20 +4,22 @@
 
 import WuzapiClient from "wuzapi";
 
-// Method 1: Traditional usage with global token
-const adminClient = new WuzapiClient({
+// Method 1: Traditional usage with tokens on the client
+// `token` is the user credential (sent as the `token` header); `adminToken` is
+// only needed for client.admin.* (sent as `Authorization`).
+const configuredClient = new WuzapiClient({
   apiUrl: "http://localhost:8080", // Your WuzAPI server URL
   token: "your-user-token-here", // Your user authentication token
+  // adminToken: "your-admin-token-here",
 });
 
-// Method 2: Flexible usage - no global token (or admin token as default)
-const userClient = new WuzapiClient({
+// Method 2: Flexible usage - no tokens on the client, supplied per request
+const flexibleClient = new WuzapiClient({
   apiUrl: "http://localhost:8080", // Your WuzAPI server URL
-  // token is optional - can be provided per request
 });
 
 // For this example, we'll use the traditional approach
-const client = adminClient;
+const client = configuredClient;
 
 async function basicExample() {
   try {
@@ -188,7 +190,7 @@ async function flexibleTokenExample() {
     const adminToken = "admin-token-here";
 
     // Test connectivity with user token
-    const isConnected = await userClient.ping({ token: userToken });
+    const isConnected = await flexibleClient.ping({ token: userToken });
     if (!isConnected) {
       console.error("❌ Cannot connect to WuzAPI server");
       return;
@@ -197,7 +199,7 @@ async function flexibleTokenExample() {
 
     // Connect to WhatsApp with user token
     console.log("🔄 Connecting to WhatsApp with user token...");
-    await userClient.session.connect(
+    await flexibleClient.session.connect(
       {
         Subscribe: ["Message", "ReadReceipt"],
         Immediate: false,
@@ -206,7 +208,7 @@ async function flexibleTokenExample() {
     );
 
     // Check status with user token
-    const status = await userClient.session.getStatus({ token: userToken });
+    const status = await flexibleClient.session.getStatus({ token: userToken });
     console.log("📱 WhatsApp Status:", {
       connected: status.Connected,
       loggedIn: status.LoggedIn,
@@ -217,7 +219,7 @@ async function flexibleTokenExample() {
       console.log("📤 Sending message with user token...");
       // Uncomment and update phone number when ready
       /*
-      const response = await userClient.chat.sendText(
+      const response = await flexibleClient.chat.sendText(
         {
           Phone: '5491155554444',
           Body: 'Hello from flexible token usage! 🚀'
@@ -231,7 +233,7 @@ async function flexibleTokenExample() {
     // Admin operations with admin token
     console.log("👨‍💼 Performing admin operations with admin token...");
     try {
-      const users = await userClient.admin.listUsers({ token: adminToken });
+      const users = await flexibleClient.admin.listUsers({ token: adminToken });
       console.log(`👥 Found ${users.length} users in system`);
     } catch (error) {
       console.log("⚠️ Admin operations require valid admin token");

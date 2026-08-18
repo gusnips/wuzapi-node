@@ -76,29 +76,56 @@ await client.session.pairPhone("5491155554444");
 
 ## 🔧 Configuration
 
+WuzAPI has two credentials, and each one has its own header:
+
+| Credential      | Header          | Used by                                        |
+| --------------- | --------------- | ---------------------------------------------- |
+| **User token**  | `token`         | Every endpoint except `/admin/*` and `/health`  |
+| **Admin token** | `Authorization` | `/admin/*` (user provisioning)                  |
+
+The server never falls back from one header to the other, so the client picks
+the header from **the endpoint you call**, never from the token value. Set
+either or both on the client:
+
 ```typescript
 interface WuzapiConfig {
   apiUrl: string; // Your WuzAPI server URL
-  token?: string; // Authentication token (can be provided per request)
+  token?: string; // User token   → sent as `token` on user endpoints
+  adminToken?: string; // Admin token  → sent as `Authorization` on /admin/*
+  debug?: boolean; // Log requests/responses through the `debug` package
 }
 
-// Global token approach
 const client = new WuzapiClient({
   apiUrl: "http://localhost:8080",
-  token: "your-token",
+  token: "your-user-token", // client.chat, client.session, client.group, ...
+  adminToken: "your-admin-token", // client.admin.*
 });
 
-// Flexible token approach
-const client = new WuzapiClient({
-  apiUrl: "http://localhost:8080",
-});
+await client.chat.sendText({ Phone: "123", Body: "Hello" }); // token: your-user-token
+await client.admin.listUsers(); // Authorization: your-admin-token
+```
 
-// Use different tokens for different operations
+### Per-request tokens
+
+`options.token` overrides the credential for a single call — useful when one
+process serves many WhatsApp users. It does **not** change which header is sent:
+on a user endpoint it is the user token, on `client.admin.*` it is the admin
+token.
+
+```typescript
+// No tokens on the client at all
+const client = new WuzapiClient({ apiUrl: "http://localhost:8080" });
+
 await client.chat.sendText(
   { Phone: "123", Body: "Hello" },
-  { token: "user-specific-token" }
+  { token: "user-specific-token" } // → token: user-specific-token
 );
+
+await client.admin.listUsers({ token: "admin-token" }); // → Authorization: admin-token
 ```
+
+If the credential an endpoint needs is missing, the call throws
+`WuzapiError(401)` before any request is sent.
 
 ## 💬 Essential Chat Operations
 
@@ -736,12 +763,15 @@ await client.group.updateRequestParticipants(
 <details>
 <summary><strong>👨‍💼 Admin Module</strong> - User management (requires admin token)</summary>
 
+These endpoints authenticate with `config.adminToken` (sent as `Authorization`).
+Pass `{ token: "admin-token" }` per call to override it.
+
 ```typescript
 // List all users
-const users = await client.admin.listUsers({ token: "admin-token" });
+const users = await client.admin.listUsers();
 
 // Get a specific user by ID
-const user = await client.admin.getUser("user-id-string", { token: "admin-token" });
+const user = await client.admin.getUser("user-id-string");
 
 // Add new user
 const newUser = await client.admin.addUser(
@@ -766,12 +796,11 @@ const newUser = await client.admin.addUser(
       retentionDays: 30,
     },
     history: 20, // Number of messages to save in the database, defaults to 0, which is disabled
-  },
-  { token: "admin-token" }
+  }
 );
 
 // Delete user by ID (ID is a string)
-await client.admin.deleteUser("user-id-string", { token: "admin-token" });
+await client.admin.deleteUser("user-id-string");
 
 // Update/edit a user
 await client.admin.updateUser(
@@ -781,14 +810,11 @@ await client.admin.updateUser(
     webhook: "https://new-webhook.com/webhook",
     events: "Message,ReadReceipt",
     history: 100,
-  },
-  { token: "admin-token" }
+  }
 );
 
 // Delete user completely (full deletion including all data)
-await client.admin.deleteUserComplete("user-id-string", {
-  token: "admin-token",
-});
+await client.admin.deleteUserComplete("user-id-string");
 ```
 
 </details>

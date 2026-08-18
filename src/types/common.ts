@@ -2,11 +2,18 @@
 
 export interface WuzapiConfig {
   apiUrl: string;
+  /** User token, sent as the `token` header on every non-admin endpoint. */
   token?: string;
+  /** Admin token, sent as the `Authorization` header on `/admin/*` endpoints. */
+  adminToken?: string;
   debug?: boolean;
 }
 
 export interface RequestOptions {
+  /**
+   * Overrides the token for this call. The header is still decided by the
+   * endpoint — a user token on user routes, an admin token on `/admin/*`.
+   */
   token?: string;
 }
 

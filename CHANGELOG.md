@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **BREAKING — auth headers are now chosen by the endpoint, not by the token value.** WuzAPI reads the user token from the `token` header and the admin token from `Authorization`, and never falls back between them. `BaseClient` previously sent `config.token` as `Authorization` on *every* endpoint and only added `Token` when a per-request token differed from it, so a client constructed with a user token authenticated no user endpoint. Each module now declares its own scheme (`AdminModule` is `"admin"`, all others `"user"`) and exactly one header is sent
+- **BREAKING — `WuzapiConfig` gained `adminToken`.** `token` is now unambiguously the *user* token (header `token`); `adminToken` is the admin credential (header `Authorization`). Callers who put an admin token in `config.token` must move it to `adminToken` — `client.admin.*` no longer falls back to `config.token` and throws `WuzapiError(401)` naming the missing field
+- `RequestOptions.token` still overrides the credential for a single call, but no longer influences which header carries it
+- **BREAKING — `SystemModule.getHealth()` no longer takes `RequestOptions`.** `/health` is mounted outside both auth middlewares; it was sending `Token` *and* `Authorization` for nothing
+
 ### Fixed
 
 - Server error messages are no longer discarded. `WuzapiError.message` now reports the envelope's `error` field (or a bare string `data` payload) instead of axios's generic "Request failed with status code N"

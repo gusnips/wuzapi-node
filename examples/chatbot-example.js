@@ -24,7 +24,8 @@ const client = CONFIG.useFlexibleTokens
     })
   : new WuzapiClient({
       apiUrl: CONFIG.apiUrl,
-      token: CONFIG.userToken, // Traditional global token
+      token: CONFIG.userToken, // User token → `token` header
+      adminToken: CONFIG.adminToken, // Admin token → `Authorization` header
     });
 
 // Helper function to get request options for flexible token usage

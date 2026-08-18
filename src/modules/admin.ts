@@ -10,6 +10,9 @@ import {
 } from "../types/admin.js";
 
 export class AdminModule extends BaseClient {
+  /** `/admin/*` authenticates with the server's admin token via `Authorization`. */
+  protected readonly authScheme = "admin" as const;
+
   /**
    * List all users
    */
