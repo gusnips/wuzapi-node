@@ -6,6 +6,19 @@ import {
 } from "./types/common.js";
 import { logger } from "./utils/logger.js";
 
+/**
+ * WuzAPI reports a failure reason in `error`, or occasionally as a bare string
+ * `data`. `message` only appears on responses that are not WuzAPI envelopes.
+ */
+function resolveErrorMessage(body: unknown, fallback: string): string {
+  if (typeof body !== "object" || body === null) return fallback;
+  const { error, message, data } = body as Record<string, unknown>;
+  if (typeof error === "string") return error;
+  if (typeof message === "string") return message;
+  if (typeof data === "string") return data;
+  return fallback;
+}
+
 export class WuzapiError extends Error {
   public code: number;
   public details?: unknown;
@@ -38,11 +51,11 @@ export class BaseClient {
       (error) => {
         if (error.response) {
           // Server responded with error status
-          const data = error.response.data;
+          const body = error.response.data;
           throw new WuzapiError(
-            data.code || error.response.status,
-            data.message || error.message,
-            data
+            body?.code || error.response.status,
+            resolveErrorMessage(body, error.message),
+            body
           );
         } else if (error.request) {
           // Request was made but no response received
@@ -104,23 +117,18 @@ export class BaseClient {
       });
     }
 
-    if (!response.data.success) {
+    // The body carries its own status: a failure can arrive over HTTP 200 with
+    // success:false and a non-2xx code, so the envelope is what decides.
+    const { code, data: payload, success } = response.data;
+    if (!success || code < 200 || code >= 300) {
       throw new WuzapiError(
-        response.data.code,
-        "API request failed",
+        code,
+        resolveErrorMessage(response.data, "API request failed"),
         response.data
       );
     }
 
-    if (response.data.code <= 200 && response.data.code >= 300) {
-      throw new WuzapiError(
-        response.data.code,
-        response.data.error || "API request failed",
-        response.data
-      );
-    }
-
-    return response.data.data;
+    return payload;
   }
 
   protected async get<T>(

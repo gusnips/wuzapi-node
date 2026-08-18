@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- Server error messages are no longer discarded. `WuzapiError.message` now reports the envelope's `error` field (or a bare string `data` payload) instead of axios's generic "Request failed with status code N"
+- Restored the non-2xx body-status check in `BaseClient`. Its condition (`code <= 200 && code >= 300`) could never be true, so a failure returned over HTTP 200 with a non-2xx envelope `code` was unwrapped as if it had succeeded
+- `modules/status`, `modules/call` and `modules/system` are now emitted as deep-import entry points — the hand-maintained Vite entry list had omitted them, so they shipped only bundled inside `index.js`
+
+### Added
+
+- `bun run test` now runs `check_response_handling.ts`, a dependency-free check covering response unwrapping and both error paths; it also runs on `prepublishOnly`
+
+### Removed
+
+- `spec.yml`, a stale duplicate of `openapi-spec.yml` (which is a strict superset of it)
+
 ## [1.10.0] - 2026-06-07
 
 ### Added

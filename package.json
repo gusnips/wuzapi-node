@@ -25,12 +25,12 @@
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist",
     "prebuild": "bun run clean",
-    "prepublishOnly": "bun run lint && bun run typecheck && bun run build",
+    "prepublishOnly": "bun run lint && bun run typecheck && bun run test && bun run build",
     "release:patch": "bun pm version patch && bun publish",
     "release:minor": "bun pm version minor && bun publish",
     "release:major": "bun pm version major && bun publish",
     "release": "bun publish",
-    "test": "echo \"No tests specified\" && exit 0"
+    "test": "bun check_response_handling.ts"
   },
   "keywords": [
     "whatsapp",
