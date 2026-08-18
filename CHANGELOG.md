@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.10.1] - 2026-08-18
+
+> **Upgrading:** this release changes which auth header each endpoint sends. If
+> you passed an admin token as `config.token`, move it to `config.adminToken` —
+> otherwise `client.admin.*` will throw `WuzapiError(401)`. Everything else
+> keeps working, and a client built with only a user token now authenticates
+> user endpoints correctly for the first time.
+
 ### Changed
 
 - **BREAKING — auth headers are now chosen by the endpoint, not by the token value.** WuzAPI reads the user token from the `token` header and the admin token from `Authorization`, and never falls back between them. `BaseClient` previously sent `config.token` as `Authorization` on *every* endpoint and only added `Token` when a per-request token differed from it, so a client constructed with a user token authenticated no user endpoint. Each module now declares its own scheme (`AdminModule` is `"admin"`, all others `"user"`) and exactly one header is sent
