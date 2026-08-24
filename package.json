@@ -1,6 +1,6 @@
 {
   "name": "wuzapi",
-  "version": "1.11.0",
+  "version": "1.11.1",
   "packageManager": "bun@1.3.8",
   "description": "TypeScript client library for WuzAPI WhatsApp API",
   "main": "./dist/index.js",
