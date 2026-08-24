@@ -2945,11 +2945,10 @@ definitions:
         format: uint32
         example: 15
       Waveform:
-        type: array
-        items:
-          type: integer
-          format: byte
-        example: [0, 0, 0, 12, 20, 20, 22, 10, 5, 0, 0, 0]
+        type: string
+        format: byte
+        description: Base64-encoded waveform samples shown in the voice-note UI (Go []byte).
+        example: "AAAAFCAUFgoFAAAAAAAAAA=="
       ContextInfo:
         $ref: "#/definitions/ContextInfo"
       QuotedMessage:

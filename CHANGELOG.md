@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.11.1] - 2026-08-24
+
+### Fixed
+
+- `SendAudioRequest.Waveform` is now `string` (base64), not `number[]`. The server decodes the field as Go `[]byte`, which JSON binds only from a base64 string — a number array failed unmarshal on the real server. The vendored spec documented this wrongly too (`array` of integers); corrected to OpenAPI `string`/`format: byte`
+
 ## [1.11.0] - 2026-08-24
 
 > **Upgrading:** `setWebhook` now sends the URL as `webhookurl` — current WuzAPI

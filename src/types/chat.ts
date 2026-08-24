@@ -56,8 +56,8 @@ export interface SendAudioRequest {
   mimetype?: string;
   /** Audio duration in seconds. */
   Seconds?: number;
-  /** Raw waveform samples shown in the voice-note UI. */
-  Waveform?: number[];
+  /** Raw waveform samples shown in the voice-note UI, base64-encoded (the server field is []byte). */
+  Waveform?: string;
   ContextInfo?: SimpleContextInfo;
   QuotedMessage?: QuotedMessagePreview;
 }
