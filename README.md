@@ -214,6 +214,9 @@ const contacts = await client.user.getContacts();
 
 // Send presence status
 await client.user.sendPresence("available");
+
+// Subscribe to a contact's presence updates
+await client.user.subscribePresence("5491155554444");
 ```
 
 ## 🔗 Webhook Setup
@@ -334,8 +337,11 @@ await client.session.connect({
 // Get connection status
 const status = await client.session.getStatus();
 
-// Disconnect (keeps session)
+// Disconnect (keeps session and event subscriptions by default)
 await client.session.disconnect();
+
+// Disconnect and also clear stored event subscriptions
+await client.session.disconnect(true);
 
 // Logout (destroys session)
 await client.session.logout();
@@ -346,6 +352,8 @@ await client.session.logout();
 ```typescript
 // Get QR code for scanning
 const qr = await client.session.getQRCode();
+// If the device pairs via passkey instead, qr.passkeyPending is true and
+// qr.publicKey holds the WebAuthn challenge — see "Passkey pairing" below.
 
 // Pair phone using phone number (generates verification code)
 await client.session.pairPhone("5491155554444");
@@ -353,11 +361,34 @@ await client.session.pairPhone("5491155554444");
 // Request message history sync
 await client.session.requestHistory();
 
-// Configure proxy
+// Configure proxy (optionally route webhook deliveries through it too)
 await client.session.setProxy("socks5://user:pass@proxy:port", true);
+await client.session.setProxy("socks5://user:pass@proxy:port", true, true);
 
 // Set historyfor user
 await client.session.setHistoryCount(100); // use 0 for disabled
+```
+
+#### Passkey pairing
+
+When the phone initiates passkey pairing instead of QR, the server delivers a
+`PasskeyRequest` webhook carrying the WebAuthn challenge. Resolve it in the
+browser with `navigator.credentials.get()`, POST the credential back, then
+confirm the 8-character code shown on the phone:
+
+```typescript
+// 1. `PasskeyRequest` webhook arrives → payload.publicKey is the challenge
+const credential = await navigator.credentials.get({ publicKey: challenge });
+
+// 2. Send the authenticator's response to the server
+await client.session.sendPasskeyResponse(credential);
+
+// 3. A `PasskeyConfirmation` webhook arrives with an 8-char code.
+//    After the user verifies it matches the phone:
+await client.session.confirmPasskey();
+
+// Poll pending state manually if you prefer (same shape as /session/qr):
+const passkey = await client.session.getPasskeyStatus();
 ```
 
 ### S3 Storage
@@ -465,14 +496,17 @@ await client.chat.sendSticker({
 ### Interactive Messages
 
 ```typescript
-// Send buttons
+// Send buttons (titles are capped at 20 characters by WhatsApp)
 await client.chat.sendButtons({
   Phone: "5491155554444",
   Body: "Choose an option:",
   Footer: "Select one:",
   Buttons: [
-    { ButtonId: "option1", ButtonText: { DisplayText: "Option 1" }, Type: 1 },
-    { ButtonId: "option2", ButtonText: { DisplayText: "Option 2" }, Type: 1 },
+    { title: "Option 1", id: "option1" }, // reply button ("type" defaults to "reply")
+    { type: "reply", title: "Option 2", id: "option2" },
+    { type: "cta_url", title: "Visit site", url: "https://example.com" },
+    { type: "cta_call", title: "Call us", phone_number: "5491155554444" },
+    { type: "copy", title: "Copy code", copy_code: "SAVE20" },
   ],
 });
 
@@ -621,6 +655,23 @@ await client.chat.requestUnavailableMessage(
   "5491155554444@s.whatsapp.net",  // sender JID
   "ABCD1234"                        // message ID
 );
+
+// Pin a message for 7 days (24h = 86400, 30d = 2592000)
+await client.chat.pinMessage({
+  Chat: "5491155554444@s.whatsapp.net",
+  Id: "ABCD1234",
+});
+
+// Pin a group message — Sender is required for groups
+await client.chat.pinMessage({
+  Chat: "120363123456789012@g.us",
+  Id: "ABCD1234",
+  Sender: "5491155554444@s.whatsapp.net",
+  DurationSeconds: 604800,
+});
+
+// Unpin
+await client.chat.pinMessage({ Chat: "...", Id: "ABCD1234", Pin: false });
 ```
 
 </details>
@@ -643,6 +694,9 @@ const contacts = await client.user.getContacts();
 
 // Send user presence (online/offline status)
 await client.user.sendPresence("available"); // or "unavailable"
+
+// Subscribe to a contact's presence updates (delivered via Presence webhooks)
+await client.user.subscribePresence("5491155554444");
 
 // Get LID (Linked ID) from phone number
 const lid = await client.user.getLid("5491155554444");
@@ -899,6 +953,9 @@ WebhookEventType.QR_SCANNED_WITHOUT_MULTIDEVICE; // "QRScannedWithoutMultidevice
 WebhookEventType.QR_TIMEOUT; // "QRTimeout"
 WebhookEventType.PAIR_SUCCESS; // "PairSuccess"
 WebhookEventType.PAIR_ERROR; // "PairError"
+WebhookEventType.PASSKEY_REQUEST; // "PasskeyRequest" — passkey pairing challenge
+WebhookEventType.PASSKEY_CONFIRMATION; // "PasskeyConfirmation" — 8-char pairing code
+WebhookEventType.PAIR_PASSKEY_ERROR; // "PairPasskeyError" — passkey pairing failure
 ```
 
 #### 💬 **Message Events**

@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.11.0] - 2026-08-24
+
+> **Upgrading:** `setWebhook` now sends the URL as `webhookurl` — current WuzAPI
+> servers silently ignore requests carrying the old `webhook` key on
+> `POST /webhook`. `session.disconnect()` takes an optional `clear` flag as its
+> first argument; move per-request tokens (`disconnect({ token })`) to the
+> second argument. `SendButtonsRequest.Buttons` uses the server's new button
+> shape.
+
+Synced against WuzAPI upstream `919c72c` (release v1.0.8).
+
+### Added
+
+- **Passkey pairing** (upstream PR #343): `client.session.getPasskeyStatus()`, `sendPasskeyResponse(request)` and `confirmPasskey()`, plus `PasskeyChallenge` / WebAuthn types. `/session/qr` and `/session/status` responses now expose `passkeyPending` and `publicKey`
+- `client.chat.pinMessage(request)` — pin/unpin messages for all participants (`POST /chat/pin`; routed upstream but missing from their spec, transcribed from handlers)
+- `client.user.subscribePresence(phone)` — subscribe to a contact's presence updates (`POST /user/presence/subscribe`)
+- New webhook events `PasskeyRequest`, `PasskeyConfirmation` and `PairPasskeyError` with typed payloads; Presence webhook payloads expose optional `last_seen` (unix seconds)
+- `POST /chat/pin` and `POST /user/presence/subscribe` documented in the vendored `openapi-spec.yml`, which upstream still omits
+
+### Changed
+
+- **BREAKING — `SetWebhookRequest.webhook` renamed to `webhookurl`.** Upstream changed the request key of `POST /webhook` from `webhook` to `webhookurl`; the old key no longer reaches the server. `updateWebhook` (PUT) keeps `webhook`
+- **BREAKING — `UpdateWebhookRequest.Active` renamed to `active`** to match the wire field verbatim
+- **BREAKING — `session.disconnect(clear?, options?)`.** Pass `true` to also clear stored event subscriptions (upstream keeps them by default since #305); per-request options moved to the second argument
+- **BREAKING — `ChatButton` replaced by `SendButton`**, a union discriminated on `type`: `"reply"` | `"cta_url"` | `"cta_call"` | `"copy"`, matching the shapes the server actually parses
+- Send requests accept every field the server decodes but we didn't type before: `LinkPreview`, `QuotedText`/`QuotedMessage` on text; `Id`/`Caption`/`ptt`/`mimetype`/`Seconds`/`Waveform` on audio; `Id` on image/video/location/contact/sticker; `MimeType` where supported; sticker pack metadata (`PackId`, `PackName`, `PackPublisher`, `Emojis`); `Participant` on reactions; `ContextInfo` on edits; phone-number fields on markRead (`ChatPhone`/`SenderPhone`, preferred by current servers over JIDs)
+- Admin create/update user accepts `expiration` and `hmacKey`, and `proxyConfig.webhookUseProxy` routes that user's webhook deliveries through their proxy (upstream #339). Status-style `proxy_config` objects expose `webhook_use_proxy` in responses
+- `session.setProxy(url, enable, webhookUseProxy?, options?)` forwards the new per-user `webhook_use_proxy` flag
+- Re-vendored `openapi-spec.yml` from upstream `static/api/spec.yml`
+
+### Fixed
+
+- Examples passed per-request options to `session.disconnect(options)`; under the new signature that object would have been read as `clear=true` and wiped event subscriptions
+
 ## [1.10.1] - 2026-08-18
 
 > **Upgrading:** this release changes which auth header each endpoint sends. If

@@ -78,7 +78,7 @@ Note `package.json` maps both `import` and `require` to the same CJS `dist/index
 1. Confirm the contract in **`openapi-spec.yml`** — the vendored WuzAPI spec (71 paths) and the source of truth for request/response shapes.
 2. Add request/response interfaces to the matching `src/types/<domain>.ts`. Field names follow the server's casing verbatim (`Phone`, `Body`, `Id`, `Subscribe`) — do **not** normalize to camelCase.
 3. Add the method to the module: a doc comment, an `options?: RequestOptions` last parameter, and a single `this.get/post/put/delete<T>(...)` call. Modules stay declarative — no logic beyond building the request body.
-4. Run `node check_endpoints.js` to confirm coverage. Its regex cannot parse template-literal routes or the `/health` bypass, so a few known false positives are expected (`GET /user/lid/{phone}`, `POST /user/privacy`, `GET /health`).
+4. Run `node check_endpoints.js` to confirm coverage. Its regex cannot parse template-literal routes, conditional query strings, or the `/health` bypass, so a few known false positives are expected on both sides: spec-side `GET /health`, `GET /user/lid/{phone}`, `POST /user/privacy`, `POST /session/disconnect`; impl-side `PUT /admin/users/{id}`, `POST /chat/archive`, `POST /session/history`, `POST path`, the `getLid` template literal.
 5. Update `README.md` (the API reference there is exhaustive and is the package's real documentation) and add a `CHANGELOG.md` entry under a new version heading.
 
 Adding a whole new module additionally requires exporting it from `src/index.ts` and registering it as a field in `WuzapiClient`. The Vite entry is picked up automatically.
