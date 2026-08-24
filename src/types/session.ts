@@ -1,4 +1,4 @@
-import { S3ConfigResponse } from "./common.js";
+import { ProxyConfigResponse, S3ConfigResponse } from "./common.js";
 import { WebhookEvent } from "./webhook.js";
 
 // Session endpoints types
@@ -26,14 +26,15 @@ export interface LogoutResponse {
 export interface StatusResponse {
   connected: boolean;
   events: (WebhookEvent | string)[];
+  hmac_configured: boolean;
+  history: number;
   id: string;
   jid: string;
   loggedIn: boolean;
   name: string;
-  proxy_config: {
-    enabled: boolean;
-    proxy_url: string;
-  };
+  passkeyPending: boolean;
+  publicKey: PasskeyChallenge | null;
+  proxy_config: ProxyConfigResponse;
   proxy_url: string;
   qrcode: string;
   s3_config: S3ConfigResponse;
@@ -41,8 +42,68 @@ export interface StatusResponse {
   webhook: string;
 }
 
-export interface QRCodeResponse {
+/** Passkey pairing state, shared by `/session/qr`, `/session/status` and `/session/passkey-status`. */
+export interface PasskeyPendingState {
+  /** True if the device initiated passkey pairing instead of QR. */
+  passkeyPending: boolean;
+  /** WebAuthn challenge data, present when `passkeyPending` is true. */
+  publicKey: PasskeyChallenge | null;
+}
+
+export type PasskeyStatusResponse = PasskeyPendingState;
+
+export interface QRCodeResponse extends PasskeyPendingState {
   QRCode: string;
+}
+
+// Passkey pairing
+
+/**
+ * WebAuthn challenge delivered via `/session/qr`, `/session/passkey-status`
+ * or the `PasskeyRequest` webhook while a device pairs through passkey.
+ * Feed it to `navigator.credentials.get()` and POST the resulting
+ * credential back via {@linkcode PasskeyResponseRequest}.
+ */
+export interface PasskeyChallenge {
+  allowCredentials: PasskeyCredentialDescriptor[];
+  challenge: string;
+  extensions?: { uvm?: boolean };
+  rpId: string;
+  timeout: number;
+  userVerification: "required" | "preferred" | "discouraged";
+}
+
+export interface PasskeyCredentialDescriptor {
+  id?: string;
+  transports?: string[];
+  type?: string;
+}
+
+/** Authenticator assertion data returned by `navigator.credentials.get()`. */
+export interface WebAuthnAssertionResponse {
+  authenticatorData: string;
+  clientDataJSON: string;
+  signature: string;
+  userHandle?: string | null;
+}
+
+/** Body of `POST /session/passkey-response`. */
+export interface PasskeyResponseRequest {
+  response: {
+    id: string;
+    rawId: string;
+    response: WebAuthnAssertionResponse;
+    type: string;
+  };
+}
+
+export interface PasskeyResponseResult {
+  status: "passkey_response_sent";
+}
+
+/** Confirms the 8-character pairing code was displayed and matches the phone. Sent after a `PasskeyConfirmation` webhook. */
+export interface PasskeyConfirmResult {
+  status: "passkey_confirmed";
 }
 
 export interface S3TestResponse {
@@ -66,6 +127,8 @@ export interface HistoryResponse {
 export interface ProxyRequest {
   proxy_url: string;
   enable: boolean;
+  /** Route webhook deliveries through this proxy. Omitted preserves the current per-user value. */
+  webhook_use_proxy?: boolean;
 }
 
 export interface ProxyResponse {

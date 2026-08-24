@@ -15,6 +15,8 @@ import {
   MarkReadRequest,
   MarkReadResponse,
   ReactRequest,
+  PinMessageRequest,
+  PinMessageResponse,
   DownloadMediaRequest,
   DownloadMediaResponse,
   DeleteMessageRequest,
@@ -170,6 +172,17 @@ export class ChatModule extends BaseClient {
     options?: RequestOptions
   ): Promise<SendMessageResponse> {
     return this.post<SendMessageResponse>("/chat/react", request, options);
+  }
+
+  /**
+   * Pin or unpin a message for all participants.
+   * Pin durations are limited by WhatsApp to 24h, 7d or 30d; defaults to 7d.
+   */
+  async pinMessage(
+    request: PinMessageRequest,
+    options?: RequestOptions
+  ): Promise<PinMessageResponse> {
+    return this.post<PinMessageResponse>("/chat/pin", request, options);
   }
 
   /**

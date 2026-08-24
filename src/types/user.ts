@@ -74,6 +74,16 @@ export interface UserPresenceResponse {
   Details: string;
 }
 
+export interface SubscribePresenceRequest {
+  /** Phone number (country code, no +) or JID of the contact to subscribe to. */
+  Phone: string;
+}
+
+/** Presence updates for subscribed contacts arrive via `Presence` webhooks. */
+export interface SubscribePresenceResponse {
+  Details: string;
+}
+
 export interface UserLidResponse {
   LID: string;
   Phone: string;

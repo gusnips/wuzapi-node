@@ -17,6 +17,10 @@ import {
   HmacConfigRequest,
   HmacConfigResponse,
   HmacDeleteResponse,
+  PasskeyStatusResponse,
+  PasskeyResponseRequest,
+  PasskeyResponseResult,
+  PasskeyConfirmResult,
 } from "../types/session.js";
 import { S3Config, RequestOptions, S3ConfigResponse } from "../types/common.js";
 
@@ -32,14 +36,17 @@ export class SessionModule extends BaseClient {
   }
 
   /**
-   * Disconnect from WhatsApp servers
+   * Disconnect from WhatsApp servers.
+   * @param clear also clear the stored event subscriptions (the server keeps them by default)
    */
-  async disconnect(options?: RequestOptions): Promise<DisconnectResponse> {
-    return this.post<DisconnectResponse>(
-      "/session/disconnect",
-      undefined,
-      options
-    );
+  async disconnect(
+    clear?: boolean,
+    options?: RequestOptions
+  ): Promise<DisconnectResponse> {
+    const path = clear
+      ? "/session/disconnect?clear=true"
+      : "/session/disconnect";
+    return this.post<DisconnectResponse>(path, undefined, options);
   }
 
   /**
@@ -106,6 +113,48 @@ export class SessionModule extends BaseClient {
   }
 
   /**
+   * Get pending passkey pairing status. Returns the WebAuthn challenge when
+   * the device initiated passkey pairing instead of QR.
+   */
+  async getPasskeyStatus(
+    options?: RequestOptions
+  ): Promise<PasskeyStatusResponse> {
+    return this.get<PasskeyStatusResponse>(
+      "/session/passkey-status",
+      options
+    );
+  }
+
+  /**
+   * Complete passkey pairing by sending the WebAuthn response from the
+   * authenticator, after receiving a `PasskeyRequest` webhook.
+   */
+  async sendPasskeyResponse(
+    request: PasskeyResponseRequest,
+    options?: RequestOptions
+  ): Promise<PasskeyResponseResult> {
+    return this.post<PasskeyResponseResult>(
+      "/session/passkey-response",
+      request,
+      options
+    );
+  }
+
+  /**
+   * Confirm that the 8-character pairing code was displayed to the user and
+   * matches the phone, after receiving a `PasskeyConfirmation` webhook.
+   */
+  async confirmPasskey(
+    options?: RequestOptions
+  ): Promise<PasskeyConfirmResult> {
+    return this.post<PasskeyConfirmResult>(
+      "/session/passkey-confirm",
+      undefined,
+      options
+    );
+  }
+
+  /**
    * Request history sync from WhatsApp servers
    */
   async requestHistory(options?: RequestOptions): Promise<HistoryResponse> {
@@ -129,13 +178,19 @@ export class SessionModule extends BaseClient {
 
   /**
    * Set proxy configuration
+   * @param webhookUseProxy route webhook deliveries through this proxy; omitted preserves the current per-user value
    */
   async setProxy(
     proxyURL: string,
     enable: boolean = true,
+    webhookUseProxy?: boolean,
     options?: RequestOptions
   ): Promise<ProxyResponse> {
-    const request: ProxyRequest = { proxy_url: proxyURL, enable: enable };
+    const request: ProxyRequest = {
+      proxy_url: proxyURL,
+      enable,
+      ...(webhookUseProxy !== undefined && { webhook_use_proxy: webhookUseProxy }),
+    };
     return this.post<ProxyResponse>("/session/proxy", request, options);
   }
 

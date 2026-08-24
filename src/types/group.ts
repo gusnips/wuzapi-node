@@ -50,6 +50,8 @@ export interface GroupListResponse {
 
 export interface GroupInviteLinkRequest {
   GroupJID: string;
+  /** Revoke the current link and generate a fresh one. */
+  Reset?: boolean;
 }
 
 export interface GroupInviteLinkResponse {

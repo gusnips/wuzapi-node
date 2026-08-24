@@ -10,6 +10,8 @@ import {
   ContactsResponse,
   UserPresenceRequest,
   UserPresenceResponse,
+  SubscribePresenceRequest,
+  SubscribePresenceResponse,
   UserLidResponse,
   UserPrivacySettings,
   PrivacySettingValueMap,
@@ -70,6 +72,21 @@ export class UserModule extends BaseClient {
   ): Promise<UserPresenceResponse> {
     const request: UserPresenceRequest = { type: presenceType };
     return this.post<UserPresenceResponse>("/user/presence", request, options);
+  }
+
+  /**
+   * Subscribe to a contact's presence updates. Delivered via `Presence` webhooks.
+   */
+  async subscribePresence(
+    phone: string,
+    options?: RequestOptions
+  ): Promise<SubscribePresenceResponse> {
+    const request: SubscribePresenceRequest = { Phone: phone };
+    return this.post<SubscribePresenceResponse>(
+      "/user/presence/subscribe",
+      request,
+      options
+    );
   }
 
   /**

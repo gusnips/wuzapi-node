@@ -217,7 +217,7 @@ async function initializeBot() {
 process.on("SIGINT", async () => {
   console.log("\n🛑 Shutting down bot...");
   try {
-    await client.session.disconnect(getRequestOptions());
+    await client.session.disconnect(undefined, getRequestOptions());
     console.log("✅ Disconnected from WhatsApp");
   } catch (error) {
     console.error("❌ Error during shutdown:", error);

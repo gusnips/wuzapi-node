@@ -1,5 +1,5 @@
 // Admin endpoints types
-import { S3ConfigResponse } from "./common.js";
+import { ProxyConfigResponse, S3ConfigResponse } from "./common.js";
 import { WebhookEvent } from "./webhook.js";
 
 export interface User {
@@ -10,10 +10,7 @@ export interface User {
   jid: string;
   loggedIn: boolean;
   name: string;
-  proxy_config: {
-    enabled: boolean;
-    proxy_url: string;
-  };
+  proxy_config: ProxyConfigResponse;
   proxy_url: string;
   qrcode: string;
   s3_config: S3ConfigResponse;
@@ -27,9 +24,15 @@ export interface CreateUserRequest {
   token: string;
   webhook?: string;
   events?: string;
+  /** Subscription expiration as a Unix timestamp. */
+  expiration?: number;
+  /** Per-user HMAC key used to sign webhook deliveries. */
+  hmacKey?: string;
   proxyConfig?: {
-    enabled: boolean;
-    proxyURL: string;
+    enabled?: boolean;
+    proxyURL?: string;
+    /** Route webhook deliveries through this proxy. Defaults to the server's WUZAPI_WEBHOOK_USE_PROXY setting. */
+    webhookUseProxy?: boolean;
   };
   s3Config?: {
     enabled: boolean;
@@ -79,9 +82,12 @@ export interface UpdateUserRequest {
   webhook?: string;
   events?: string;
   history?: number;
+  /** Subscription expiration as a Unix timestamp. */
+  expiration?: number;
   proxyConfig?: {
-    enabled: boolean;
-    proxyURL: string;
+    enabled?: boolean;
+    proxyURL?: string;
+    webhookUseProxy?: boolean;
   };
   s3Config?: {
     enabled: boolean;

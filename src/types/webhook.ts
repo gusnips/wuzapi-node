@@ -1,4 +1,5 @@
 // Import types that are identical from other modules
+import type { PasskeyChallenge } from "./session.js";
 import type { VerifiedName } from "./user.js";
 
 // Webhook endpoints types
@@ -27,6 +28,9 @@ export enum WebhookEventType {
   STREAM_REPLACED = "StreamReplaced",
   PAIR_SUCCESS = "PairSuccess",
   PAIR_ERROR = "PairError",
+  PASSKEY_REQUEST = "PasskeyRequest",
+  PASSKEY_CONFIRMATION = "PasskeyConfirmation",
+  PAIR_PASSKEY_ERROR = "PairPasskeyError",
   QR = "QR",
   QR_SCANNED_WITHOUT_MULTIDEVICE = "QRScannedWithoutMultidevice",
   QR_TIMEOUT = "QRTimeout",
@@ -62,7 +66,11 @@ export const WEBHOOK_EVENTS = Object.values(WebhookEventType);
 export type WebhookEvent = keyof typeof WebhookEventType;
 
 export interface SetWebhookRequest {
-  webhook: string;
+  /**
+   * Webhook URL. Decoded from the `webhookurl` key by current WuzAPI
+   * servers — older servers read `webhook`.
+   */
+  webhookurl: string;
   events: (WebhookEvent | string)[];
 }
 
@@ -79,7 +87,7 @@ export interface GetWebhookResponse {
 export interface UpdateWebhookRequest {
   webhook?: string;
   events?: (WebhookEvent | string)[];
-  Active?: boolean;
+  active?: boolean;
 }
 
 export interface UpdateWebhookResponse {
@@ -634,6 +642,39 @@ export interface MessageWebhookEvent {
   UnavailableRequestID: string;
 }
 
+// Presence webhook event data
+// Fired for contacts subscribed via POST /user/presence/subscribe (and for the account itself)
+export interface PresenceWebhookEvent {
+  /** JID of the contact whose presence changed. */
+  from: string;
+  state: "online" | "offline";
+  /**
+   * Unix timestamp of the contact's last seen. Only present when the
+   * contact went offline and WhatsApp reported a timestamp.
+   */
+  last_seen?: number;
+}
+
+// PasskeyRequest webhook event data — the device initiated passkey pairing.
+// Complete the flow by POSTing the authenticator's response to /session/passkey-response.
+export interface PasskeyRequestWebhookEvent {
+  publicKey: PasskeyChallenge;
+}
+
+// PasskeyConfirmation webhook event data — an 8-character pairing code was
+// generated. Show it to the user, then POST /session/passkey-confirm once confirmed.
+export interface PasskeyConfirmationWebhookEvent {
+  code: string;
+  skipHandoffUX: boolean;
+}
+
+// PairPasskeyError webhook event data — passkey pairing failed.
+export interface PairPasskeyErrorWebhookEvent {
+  error: string;
+  /** Whether the pairing ceremony can continue with another method. */
+  continuation: boolean;
+}
+
 // Typed webhook payloads for specific events
 export type QRWebhookPayload = AnyWebhookPayload<QRWebhookEvent> & {
   qrCodeBase64: string; // QR code as base64 data URL
@@ -646,6 +687,13 @@ export type ReadReceiptWebhookPayload =
 export type HistorySyncWebhookPayload =
   AnyWebhookPayload<HistorySyncWebhookEvent>;
 export type MessageWebhookPayload = AnyWebhookPayload<MessageWebhookEvent>;
+export type PresenceWebhookPayload = AnyWebhookPayload<PresenceWebhookEvent>;
+export type PasskeyRequestWebhookPayload =
+  AnyWebhookPayload<PasskeyRequestWebhookEvent>;
+export type PasskeyConfirmationWebhookPayload =
+  AnyWebhookPayload<PasskeyConfirmationWebhookEvent>;
+export type PairPasskeyErrorWebhookPayload =
+  AnyWebhookPayload<PairPasskeyErrorWebhookEvent>;
 
 // Webhook event mapping types for type-safe handling
 export interface WebhookEventMap {
@@ -655,6 +703,10 @@ export interface WebhookEventMap {
   ReadReceipt: ReadReceiptWebhookEvent;
   HistorySync: HistorySyncWebhookEvent;
   Message: MessageWebhookEvent;
+  Presence: PresenceWebhookEvent;
+  PasskeyRequest: PasskeyRequestWebhookEvent;
+  PasskeyConfirmation: PasskeyConfirmationWebhookEvent;
+  PairPasskeyError: PairPasskeyErrorWebhookEvent;
   // Add more webhook event mappings here as they are discovered
 }
 
@@ -670,7 +722,11 @@ export type SpecificWebhookPayload =
   | ConnectedWebhookPayload
   | ReadReceiptWebhookPayload
   | HistorySyncWebhookPayload
-  | MessageWebhookPayload;
+  | MessageWebhookPayload
+  | PresenceWebhookPayload
+  | PasskeyRequestWebhookPayload
+  | PasskeyConfirmationWebhookPayload
+  | PairPasskeyErrorWebhookPayload;
 
 // Type guard to check if payload is a specific webhook event type
 export function isWebhookEventType<T extends keyof WebhookEventMap>(

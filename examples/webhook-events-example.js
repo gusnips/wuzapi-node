@@ -684,7 +684,7 @@ process.on("SIGINT", async () => {
   console.log("\n🛑 Shutting down webhook server...");
   try {
     await client.session.disconnect();
-    // With flexible tokens: await client.session.disconnect({ token: "user-specific-token" });
+    // With flexible tokens: await client.session.disconnect(undefined, { token: "user-specific-token" });
     console.log("✅ Disconnected from WhatsApp");
   } catch (error) {
     console.error("❌ Error during shutdown:", error);

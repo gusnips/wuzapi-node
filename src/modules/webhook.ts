@@ -21,7 +21,7 @@ export class WebhookModule extends BaseClient {
     events: (WebhookEvent | string)[] = ["All"],
     options?: RequestOptions
   ): Promise<SetWebhookResponse> {
-    const request: SetWebhookRequest = { webhook: webhookURL, events };
+    const request: SetWebhookRequest = { webhookurl: webhookURL, events };
     return this.post<SetWebhookResponse>("/webhook", request, options);
   }
 
@@ -44,7 +44,7 @@ export class WebhookModule extends BaseClient {
     const request: UpdateWebhookRequest = {
       webhook: webhookURL,
       events,
-      Active: active,
+      active,
     };
     return this.put<UpdateWebhookResponse>("/webhook", request, options);
   }

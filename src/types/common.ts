@@ -47,6 +47,14 @@ export interface S3Config {
   retentionDays: number;
 }
 
+/** Wire shape of `proxy_config` in status-style responses. */
+export interface ProxyConfigResponse {
+  enabled: boolean;
+  proxy_url: string;
+  /** Whether webhook deliveries use the configured proxy. */
+  webhook_use_proxy: boolean;
+}
+
 export interface S3ConfigResponse {
   access_key: string;
   bucket: string;
