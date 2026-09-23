@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- README: how to tell an offline session from a logged-out one with `getQRCode()`, why the server can drop the `LoggedOut` webhook and how to notice anyway, what `Reason` 401/403/406 mean, and the 409 that `connect()` now returns on a connected session
+
+### Fixed
+
+- **BREAKING — `ConnectFailureReason` holds whatsmeow's real codes** (400 to 503: `LOGGED_OUT = 401`, `MAIN_DEVICE_GONE = 403`, `UNKNOWN_LOGOUT = 406`, …). The old values (4001 to 4015) matched nothing the server sends. Members whatsmeow doesn't have (`SOCKET_OPEN_TIMEOUT`, `BAD_MAC`, `RATE_LIMIT_HIT`, …) are gone
+- `LoggedOut.Reason` is a `ConnectFailureReason` (a number on the wire), not a `string`
+
 ## [1.11.1] - 2026-08-24
 
 ### Fixed

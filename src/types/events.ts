@@ -275,22 +275,32 @@ export enum UnavailableType {
   VIEW_ONCE = "view_once",
 }
 
+/**
+ * The code WhatsApp gives when it refuses a connection or ends a session
+ * (whatsmeow's `ConnectFailureReason`). `ConnectFailure` and `LoggedOut` carry
+ * it as `Reason`. After 401, 403 or 406 the number has to pair again.
+ */
 export enum ConnectFailureReason {
-  SOCKET_OPEN_TIMEOUT = 4001,
-  SOCKET_PING_TIMEOUT = 4002,
-  SOCKET_PONG_TIMEOUT = 4003,
-  UNKNOWN_LOGOUT = 4004,
-  BAD_MAC = 4005,
-  INIT_TIMEOUT = 4006,
-  MULTI_DEVICE_MISMATCH = 4007,
-  MULTI_DEVICE_DISABLED = 4008,
-  TEMP_BANNED = 4009,
-  CLIENT_OUTDATED = 4010,
-  STREAM_ERROR = 4011,
-  DEVICE_GONE = 4012,
-  IDENTITY_MISSING = 4013,
-  RATE_LIMIT_HIT = 4014,
-  MAIN_DEVICE_GONE = 4015,
+  GENERIC = 400,
+  /** The device was removed: from the phone, or by WhatsApp. */
+  LOGGED_OUT = 401,
+  TEMP_BANNED = 402,
+  /**
+   * WhatsApp Web calls this LOCKED. It comes when WhatsApp restricts the
+   * number, and also when its owner switches phones.
+   */
+  MAIN_DEVICE_GONE = 403,
+  CLIENT_OUTDATED = 405,
+  /** WhatsApp Web calls this BANNED. */
+  UNKNOWN_LOGOUT = 406,
+  BAD_USER_AGENT = 409,
+  CAT_EXPIRED = 413,
+  CAT_INVALID = 414,
+  NOT_FOUND = 415,
+  CLIENT_UNKNOWN = 418,
+  INTERNAL_SERVER_ERROR = 500,
+  EXPERIMENTAL = 501,
+  SERVICE_UNAVAILABLE = 503,
 }
 
 export enum TempBanReason {
@@ -533,9 +543,14 @@ export interface LabelEdit {
   FromFullSync: boolean;
 }
 
+/**
+ * The server may never deliver this event: see "When LoggedOut never arrives"
+ * in the README.
+ */
 export interface LoggedOut {
+  /** true: WhatsApp refused a reconnect. false: it ended a live connection. */
   OnConnect: boolean;
-  Reason: string;
+  Reason: ConnectFailureReason;
 }
 
 export interface ManualLoginReconnect {

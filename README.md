@@ -347,6 +347,35 @@ await client.session.disconnect(true);
 await client.session.logout();
 ```
 
+#### Offline or logged out?
+
+`getStatus()` returns `connected: false, loggedIn: false` both when the network dropped and when WhatsApp logged the number out. `getQRCode()` only reads, and its error tells you which one it is:
+
+```typescript
+import { WuzapiError } from "wuzapi";
+
+async function sessionState(token: string) {
+  try {
+    await client.session.getQRCode({ token });
+    return "pairing"; // a QR code is waiting to be scanned
+  } catch (error) {
+    if (!(error instanceof WuzapiError)) throw error;
+    switch (error.message) {
+      case "no session":
+        return "gone"; // logged out, QR expired, or you called disconnect()/logout()
+      case "not connected":
+        return "offline"; // the server is reconnecting it on its own
+      case "already logged in":
+        return "online";
+      default:
+        throw error;
+    }
+  }
+}
+```
+
+After a logout, `"gone"` means the number has to pair again. After your own `disconnect()`, `connect()` brings it back without a QR code.
+
 ### Authentication
 
 ```typescript
@@ -945,6 +974,22 @@ WebhookEventType.STREAM_ERROR; // "StreamError"
 WebhookEventType.STREAM_REPLACED; // "StreamReplaced"
 ```
 
+#### When LoggedOut never arrives
+
+The server can drop the `LoggedOut` webhook. On `LoggedOut` it shuts the session down, and the shutdown deletes the user's webhook HTTP client. The webhook goes out from a separate goroutine that often runs after that, finds no client and gives up. The server logs `HTTP client is nil for user, skipping webhook`. (Checked against upstream WuzAPI `30d7780`.)
+
+It isn't rare. On one production server, 9 of 16 logouts in three weeks never reached the webhook, and 8 of those 9 had `OnConnect: true`. That's the case where WhatsApp drops the connection, the server reconnects a few seconds later, and WhatsApp refuses it. Usually the only webhook you get is the `Disconnected` from before the reconnect.
+
+So check a `Disconnected` before you treat it as a network blip. Some seconds after it, call `getQRCode()` (see [Offline or logged out?](#offline-or-logged-out)). `"no session"` means the session is gone. Ask twice, some seconds apart, before you act on it: a server that just restarted recreates its sessions in the background, and answers `"no session"` until it gets to yours.
+
+`Reason` is a number from `ConnectFailureReason`. The three that end the session:
+
+| `Reason` | What happened |
+| --- | --- |
+| 401 | The device was removed, from the phone or by WhatsApp |
+| 403 | WhatsApp locked the number (a restriction), or its owner changed phones |
+| 406 | WhatsApp banned the number |
+
 #### 🔐 **Authentication Events**
 
 ```typescript
@@ -1472,11 +1517,14 @@ try {
 }
 ```
 
-### Common Error Codes
+### Common error codes
 
 - **401**: Authentication required
 - **404**: Endpoint not found
-- **500**: Server error
+- **409**: `connect()` on a session that is already connected (`"already connected"`)
+- **500**: Server error, and most session-state errors: `"no session"`, `"not connected"`, `"already logged in"`
+
+`error.message` is the server's own text, so compare against it rather than the code. `error.details` holds the whole response body.
 
 </details>
 
