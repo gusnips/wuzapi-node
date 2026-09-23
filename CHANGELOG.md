@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.12.0] - 2026-09-23
+
+> **Upgrading:** `ConnectFailureReason` now holds the codes the server really
+> sends (400 to 503). Its old members (4001 to 4015) never matched a real
+> value, so code that compared against them never fired; switch to
+> `LOGGED_OUT`, `MAIN_DEVICE_GONE` and `UNKNOWN_LOGOUT`. `LoggedOut.Reason` is
+> a number, not a string.
+
 ### Added
 
 - README: how to tell an offline session from a logged-out one with `getQRCode()`, why the server can drop the `LoggedOut` webhook and how to notice anyway, what `Reason` 401/403/406 mean, and the 409 that `connect()` now returns on a connected session
