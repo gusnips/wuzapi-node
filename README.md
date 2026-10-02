@@ -107,7 +107,7 @@ await client.admin.listUsers(); // Authorization: your-admin-token
 
 ### Per-request tokens
 
-`options.token` overrides the credential for a single call — useful when one
+`options.token` overrides the credential for a single call. It is useful when one
 process serves many WhatsApp users. It does **not** change which header is sent:
 on a user endpoint it is the user token, on `client.admin.*` it is the admin
 token.
@@ -382,7 +382,7 @@ After a logout, `"gone"` means the number has to pair again. After your own `dis
 // Get QR code for scanning
 const qr = await client.session.getQRCode();
 // If the device pairs via passkey instead, qr.passkeyPending is true and
-// qr.publicKey holds the WebAuthn challenge — see "Passkey pairing" below.
+// qr.publicKey holds the WebAuthn challenge, see "Passkey pairing" below.
 
 // Pair phone using phone number (generates verification code)
 await client.session.pairPhone("5491155554444");
@@ -691,7 +691,7 @@ await client.chat.pinMessage({
   Id: "ABCD1234",
 });
 
-// Pin a group message — Sender is required for groups
+// Pin a group message. Sender is required for groups
 await client.chat.pinMessage({
   Chat: "120363123456789012@g.us",
   Id: "ABCD1234",
@@ -998,9 +998,9 @@ WebhookEventType.QR_SCANNED_WITHOUT_MULTIDEVICE; // "QRScannedWithoutMultidevice
 WebhookEventType.QR_TIMEOUT; // "QRTimeout"
 WebhookEventType.PAIR_SUCCESS; // "PairSuccess"
 WebhookEventType.PAIR_ERROR; // "PairError"
-WebhookEventType.PASSKEY_REQUEST; // "PasskeyRequest" — passkey pairing challenge
-WebhookEventType.PASSKEY_CONFIRMATION; // "PasskeyConfirmation" — 8-char pairing code
-WebhookEventType.PAIR_PASSKEY_ERROR; // "PairPasskeyError" — passkey pairing failure
+WebhookEventType.PASSKEY_REQUEST; // "PasskeyRequest", passkey pairing challenge
+WebhookEventType.PASSKEY_CONFIRMATION; // "PasskeyConfirmation", 8-char pairing code
+WebhookEventType.PAIR_PASSKEY_ERROR; // "PairPasskeyError", passkey pairing failure
 ```
 
 #### 💬 **Message Events**

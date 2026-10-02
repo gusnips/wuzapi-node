@@ -21,18 +21,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **BREAKING — `ConnectFailureReason` holds whatsmeow's real codes** (400 to 503: `LOGGED_OUT = 401`, `MAIN_DEVICE_GONE = 403`, `UNKNOWN_LOGOUT = 406`, …). The old values (4001 to 4015) matched nothing the server sends. Members whatsmeow doesn't have (`SOCKET_OPEN_TIMEOUT`, `BAD_MAC`, `RATE_LIMIT_HIT`, …) are gone
+- **BREAKING: `ConnectFailureReason` holds whatsmeow's real codes** (400 to 503: `LOGGED_OUT = 401`, `MAIN_DEVICE_GONE = 403`, `UNKNOWN_LOGOUT = 406`, …). The old values (4001 to 4015) matched nothing the server sends. Members whatsmeow doesn't have (`SOCKET_OPEN_TIMEOUT`, `BAD_MAC`, `RATE_LIMIT_HIT`, …) are gone
 - `LoggedOut.Reason` is a `ConnectFailureReason` (a number on the wire), not a `string`
 
 ## [1.11.1] - 2026-08-24
 
 ### Fixed
 
-- `SendAudioRequest.Waveform` is now `string` (base64), not `number[]`. The server decodes the field as Go `[]byte`, which JSON binds only from a base64 string — a number array failed unmarshal on the real server. The vendored spec documented this wrongly too (`array` of integers); corrected to OpenAPI `string`/`format: byte`
+- `SendAudioRequest.Waveform` is now `string` (base64), not `number[]`. The server decodes the field as Go `[]byte`, which JSON binds only from a base64 string, so a number array failed unmarshal on the real server. The vendored spec documented this wrongly too (`array` of integers); corrected to OpenAPI `string`/`format: byte`
 
 ## [1.11.0] - 2026-08-24
 
-> **Upgrading:** `setWebhook` now sends the URL as `webhookurl` — current WuzAPI
+> **Upgrading:** `setWebhook` now sends the URL as `webhookurl`. Current WuzAPI
 > servers silently ignore requests carrying the old `webhook` key on
 > `POST /webhook`. `session.disconnect()` takes an optional `clear` flag as its
 > first argument; move per-request tokens (`disconnect({ token })`) to the
@@ -44,17 +44,17 @@ Synced against WuzAPI upstream `919c72c` (release v1.0.8).
 ### Added
 
 - **Passkey pairing** (upstream PR #343): `client.session.getPasskeyStatus()`, `sendPasskeyResponse(request)` and `confirmPasskey()`, plus `PasskeyChallenge` / WebAuthn types. `/session/qr` and `/session/status` responses now expose `passkeyPending` and `publicKey`
-- `client.chat.pinMessage(request)` — pin/unpin messages for all participants (`POST /chat/pin`; routed upstream but missing from their spec, transcribed from handlers)
-- `client.user.subscribePresence(phone)` — subscribe to a contact's presence updates (`POST /user/presence/subscribe`)
+- `client.chat.pinMessage(request)`: pin/unpin messages for all participants (`POST /chat/pin`; routed upstream but missing from their spec, transcribed from handlers)
+- `client.user.subscribePresence(phone)`: subscribe to a contact's presence updates (`POST /user/presence/subscribe`)
 - New webhook events `PasskeyRequest`, `PasskeyConfirmation` and `PairPasskeyError` with typed payloads; Presence webhook payloads expose optional `last_seen` (unix seconds)
 - `POST /chat/pin` and `POST /user/presence/subscribe` documented in the vendored `openapi-spec.yml`, which upstream still omits
 
 ### Changed
 
-- **BREAKING — `SetWebhookRequest.webhook` renamed to `webhookurl`.** Upstream changed the request key of `POST /webhook` from `webhook` to `webhookurl`; the old key no longer reaches the server. `updateWebhook` (PUT) keeps `webhook`
-- **BREAKING — `UpdateWebhookRequest.Active` renamed to `active`** to match the wire field verbatim
-- **BREAKING — `session.disconnect(clear?, options?)`.** Pass `true` to also clear stored event subscriptions (upstream keeps them by default since #305); per-request options moved to the second argument
-- **BREAKING — `ChatButton` replaced by `SendButton`**, a union discriminated on `type`: `"reply"` | `"cta_url"` | `"cta_call"` | `"copy"`, matching the shapes the server actually parses
+- **BREAKING: `SetWebhookRequest.webhook` renamed to `webhookurl`.** Upstream changed the request key of `POST /webhook` from `webhook` to `webhookurl`; the old key no longer reaches the server. `updateWebhook` (PUT) keeps `webhook`
+- **BREAKING: `UpdateWebhookRequest.Active` renamed to `active`** to match the wire field verbatim
+- **BREAKING: `session.disconnect(clear?, options?)`.** Pass `true` to also clear stored event subscriptions (upstream keeps them by default since #305); per-request options moved to the second argument
+- **BREAKING: `ChatButton` replaced by `SendButton`**, a union discriminated on `type`: `"reply"` | `"cta_url"` | `"cta_call"` | `"copy"`, matching the shapes the server actually parses
 - Send requests accept every field the server decodes but we didn't type before: `LinkPreview`, `QuotedText`/`QuotedMessage` on text; `Id`/`Caption`/`ptt`/`mimetype`/`Seconds`/`Waveform` on audio; `Id` on image/video/location/contact/sticker; `MimeType` where supported; sticker pack metadata (`PackId`, `PackName`, `PackPublisher`, `Emojis`); `Participant` on reactions; `ContextInfo` on edits; phone-number fields on markRead (`ChatPhone`/`SenderPhone`, preferred by current servers over JIDs)
 - Admin create/update user accepts `expiration` and `hmacKey`, and `proxyConfig.webhookUseProxy` routes that user's webhook deliveries through their proxy (upstream #339). Status-style `proxy_config` objects expose `webhook_use_proxy` in responses
 - `session.setProxy(url, enable, webhookUseProxy?, options?)` forwards the new per-user `webhook_use_proxy` flag
@@ -67,23 +67,23 @@ Synced against WuzAPI upstream `919c72c` (release v1.0.8).
 ## [1.10.1] - 2026-08-18
 
 > **Upgrading:** this release changes which auth header each endpoint sends. If
-> you passed an admin token as `config.token`, move it to `config.adminToken` —
+> you passed an admin token as `config.token`, move it to `config.adminToken`,
 > otherwise `client.admin.*` will throw `WuzapiError(401)`. Everything else
 > keeps working, and a client built with only a user token now authenticates
 > user endpoints correctly for the first time.
 
 ### Changed
 
-- **BREAKING — auth headers are now chosen by the endpoint, not by the token value.** WuzAPI reads the user token from the `token` header and the admin token from `Authorization`, and never falls back between them. `BaseClient` previously sent `config.token` as `Authorization` on *every* endpoint and only added `Token` when a per-request token differed from it, so a client constructed with a user token authenticated no user endpoint. Each module now declares its own scheme (`AdminModule` is `"admin"`, all others `"user"`) and exactly one header is sent
-- **BREAKING — `WuzapiConfig` gained `adminToken`.** `token` is now unambiguously the *user* token (header `token`); `adminToken` is the admin credential (header `Authorization`). Callers who put an admin token in `config.token` must move it to `adminToken` — `client.admin.*` no longer falls back to `config.token` and throws `WuzapiError(401)` naming the missing field
+- **BREAKING: auth headers are now chosen by the endpoint, not by the token value.** WuzAPI reads the user token from the `token` header and the admin token from `Authorization`, and never falls back between them. `BaseClient` previously sent `config.token` as `Authorization` on *every* endpoint and only added `Token` when a per-request token differed from it, so a client constructed with a user token authenticated no user endpoint. Each module now declares its own scheme (`AdminModule` is `"admin"`, all others `"user"`) and exactly one header is sent
+- **BREAKING: `WuzapiConfig` gained `adminToken`.** `token` is now unambiguously the *user* token (header `token`); `adminToken` is the admin credential (header `Authorization`). Callers who put an admin token in `config.token` must move it to `adminToken`. `client.admin.*` no longer falls back to `config.token` and throws `WuzapiError(401)` naming the missing field
 - `RequestOptions.token` still overrides the credential for a single call, but no longer influences which header carries it
-- **BREAKING — `SystemModule.getHealth()` no longer takes `RequestOptions`.** `/health` is mounted outside both auth middlewares; it was sending `Token` *and* `Authorization` for nothing
+- **BREAKING: `SystemModule.getHealth()` no longer takes `RequestOptions`.** `/health` is mounted outside both auth middlewares; it was sending `Token` *and* `Authorization` for nothing
 
 ### Fixed
 
 - Server error messages are no longer discarded. `WuzapiError.message` now reports the envelope's `error` field (or a bare string `data` payload) instead of axios's generic "Request failed with status code N"
 - Restored the non-2xx body-status check in `BaseClient`. Its condition (`code <= 200 && code >= 300`) could never be true, so a failure returned over HTTP 200 with a non-2xx envelope `code` was unwrapped as if it had succeeded
-- `modules/status`, `modules/call` and `modules/system` are now emitted as deep-import entry points — the hand-maintained Vite entry list had omitted them, so they shipped only bundled inside `index.js`
+- `modules/status`, `modules/call` and `modules/system` are now emitted as deep-import entry points. The hand-maintained Vite entry list had omitted them, so they shipped only bundled inside `index.js`
 
 ### Added
 
@@ -113,7 +113,7 @@ Synced against WuzAPI upstream `919c72c` (release v1.0.8).
 
 ### Fixed
 
-- `deleteMessage` now sends the required `Phone` field to the server — the previous implementation only sent `Id` which caused a 400 "missing Phone in Payload" error
+- `deleteMessage` now sends the required `Phone` field to the server. The previous implementation only sent `Id` which caused a 400 "missing Phone in Payload" error
 
 ### Changed
 
