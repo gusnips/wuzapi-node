@@ -4,14 +4,14 @@
 
 import { readFileSync } from "node:fs";
 
-const EM_DASH = "—";
+const EM_DASH = /—|\\u2014|\\u\{2014\}|&mdash;|&#(?:0*8212|x0*2014);/i;
 const files = ["README.md", "CHANGELOG.md", "package.json"];
 
 const problems = files.flatMap((file) =>
   readFileSync(file, "utf8")
     .split("\n")
     .flatMap((line, i) =>
-      line.includes(EM_DASH) ? [`${file}:${i + 1}: ${line.trim()}`] : [],
+      EM_DASH.test(line) ? [`${file}:${i + 1}: ${line.trim()}`] : [],
     ),
 );
 
