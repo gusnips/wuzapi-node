@@ -2,15 +2,17 @@ import js from "@eslint/js";
 import typescript from "@typescript-eslint/eslint-plugin";
 import typescriptParser from "@typescript-eslint/parser";
 
-// No em dash in the text readers see: error messages and any string in src/. Comments are
-// not nodes, so they stay free. README, CHANGELOG and package.json are covered by
-// scripts/check-no-em-dash.ts. The unicode escape keeps the character out of this file.
-const NO_EM_DASH = ["Literal[value=/\\u2014/]", "TemplateElement[value.cooked=/\\u2014/]"].map(
-  (selector) => ({
-    selector,
-    message: "No em dash in user-facing text. Use a period, comma, colon or parentheses.",
-  }),
-);
+// No em dash in source strings. Implementation comments stay exempt.
+// scripts/check-no-em-dash.ts covers README, CHANGELOG, package.json, published JSDoc and
+// HTML entities in source text. The unicode escape keeps the character out of this file.
+const NO_EM_DASH = [
+  "Literal[value=/\\u2014/]",
+  "TemplateElement[value.cooked=/\\u2014/]",
+].map((selector) => ({
+  selector,
+  message:
+    "No em dash in user-facing text. Use a period, comma, colon or parentheses.",
+}));
 
 export default [
   {
