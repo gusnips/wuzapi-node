@@ -11,8 +11,8 @@ export interface WuzapiConfig {
 
 export interface RequestOptions {
   /**
-   * Overrides the token for this call. The header is still decided by the
-   * endpoint — a user token on user routes, an admin token on `/admin/*`.
+   * Overrides the token for this call. The header is still decided by the endpoint: a user token on
+   * user routes, an admin token on `/admin/*`.
    */
   token?: string;
 }
