@@ -9,9 +9,8 @@ export interface SendMessageResponse {
 }
 
 /**
- * Custom reply preview for a text message. The server renders it as an
- * `extendedTextMessage` quote — no real message is linked, it only shapes
- * the preview shown above the reply.
+ * Custom reply preview for a text message. The server renders it as an `extendedTextMessage` quote.
+ * It shapes the preview shown above the reply without linking a real message.
  */
 export interface QuotedMessagePreview {
   extendedTextMessage: {
@@ -138,9 +137,9 @@ export interface MarkReadRequest {
   id: string[];
   Chat: string;
   Sender?: string;
-  /** Phone number of the chat — preferred over the `Chat` JID by current servers. */
+  /** Phone number of the chat. Current servers prefer it over the `Chat` JID. */
   ChatPhone?: string;
-  /** Phone number of the sender — preferred over the `Sender` JID by current servers. */
+  /** Phone number of the sender. Current servers prefer it over the `Sender` JID. */
   SenderPhone?: string;
 }
 
@@ -182,10 +181,9 @@ export interface DeleteMessageResponse {
 }
 
 /**
- * One button of a SendButtons message. WhatsApp caps button titles at
- * 20 characters; the server truncates longer titles. The server also
- * honors legacy alias fields (`text`, `buttonText`, `buttonId`) — prefer
- * the canonical ones here.
+ * One button of a SendButtons message. WhatsApp caps button titles at 20 characters; the server
+ * truncates longer titles. The server also honors legacy alias fields (`text`, `buttonText`,
+ * `buttonId`). Prefer the canonical ones here.
  */
 export type SendButton =
   | { type?: "reply"; title: string; id?: string }

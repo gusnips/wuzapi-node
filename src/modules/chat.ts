@@ -39,7 +39,7 @@ export class ChatModule extends BaseClient {
    */
   async sendText(
     request: SendTextRequest,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<SendMessageResponse> {
     return this.post<SendMessageResponse>("/chat/send/text", request, options);
   }
@@ -49,12 +49,12 @@ export class ChatModule extends BaseClient {
    */
   async sendTemplate(
     request: SendTemplateRequest,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<SendMessageResponse> {
     return this.post<SendMessageResponse>(
       "/chat/send/template",
       request,
-      options
+      options,
     );
   }
 
@@ -63,7 +63,7 @@ export class ChatModule extends BaseClient {
    */
   async sendAudio(
     request: SendAudioRequest,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<SendMessageResponse> {
     return this.post<SendMessageResponse>("/chat/send/audio", request, options);
   }
@@ -73,7 +73,7 @@ export class ChatModule extends BaseClient {
    */
   async sendImage(
     request: SendImageRequest,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<SendMessageResponse> {
     return this.post<SendMessageResponse>("/chat/send/image", request, options);
   }
@@ -83,12 +83,12 @@ export class ChatModule extends BaseClient {
    */
   async sendDocument(
     request: SendDocumentRequest,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<SendMessageResponse> {
     return this.post<SendMessageResponse>(
       "/chat/send/document",
       request,
-      options
+      options,
     );
   }
 
@@ -97,7 +97,7 @@ export class ChatModule extends BaseClient {
    */
   async sendVideo(
     request: SendVideoRequest,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<SendMessageResponse> {
     return this.post<SendMessageResponse>("/chat/send/video", request, options);
   }
@@ -107,12 +107,12 @@ export class ChatModule extends BaseClient {
    */
   async sendSticker(
     request: SendStickerRequest,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<SendMessageResponse> {
     return this.post<SendMessageResponse>(
       "/chat/send/sticker",
       request,
-      options
+      options,
     );
   }
 
@@ -121,12 +121,12 @@ export class ChatModule extends BaseClient {
    */
   async sendLocation(
     request: SendLocationRequest,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<SendMessageResponse> {
     return this.post<SendMessageResponse>(
       "/chat/send/location",
       request,
-      options
+      options,
     );
   }
 
@@ -135,12 +135,12 @@ export class ChatModule extends BaseClient {
    */
   async sendContact(
     request: SendContactRequest,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<SendMessageResponse> {
     return this.post<SendMessageResponse>(
       "/chat/send/contact",
       request,
-      options
+      options,
     );
   }
 
@@ -149,7 +149,7 @@ export class ChatModule extends BaseClient {
    */
   async sendPresence(
     request: ChatPresenceRequest,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<void> {
     await this.post<void>("/chat/presence", request, options);
   }
@@ -159,7 +159,7 @@ export class ChatModule extends BaseClient {
    */
   async markRead(
     request: MarkReadRequest,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<MarkReadResponse> {
     return this.post<MarkReadResponse>("/chat/markread", request, options);
   }
@@ -169,7 +169,7 @@ export class ChatModule extends BaseClient {
    */
   async react(
     request: ReactRequest,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<SendMessageResponse> {
     return this.post<SendMessageResponse>("/chat/react", request, options);
   }
@@ -180,7 +180,7 @@ export class ChatModule extends BaseClient {
    */
   async pinMessage(
     request: PinMessageRequest,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<PinMessageResponse> {
     return this.post<PinMessageResponse>("/chat/pin", request, options);
   }
@@ -190,12 +190,12 @@ export class ChatModule extends BaseClient {
    */
   async downloadImage(
     request: DownloadMediaRequest,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<DownloadMediaResponse> {
     return this.post<DownloadMediaResponse>(
       "/chat/downloadimage",
       request,
-      options
+      options,
     );
   }
 
@@ -204,12 +204,12 @@ export class ChatModule extends BaseClient {
    */
   async downloadVideo(
     request: DownloadMediaRequest,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<DownloadMediaResponse> {
     return this.post<DownloadMediaResponse>(
       "/chat/downloadvideo",
       request,
-      options
+      options,
     );
   }
 
@@ -218,12 +218,12 @@ export class ChatModule extends BaseClient {
    */
   async downloadAudio(
     request: DownloadMediaRequest,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<DownloadMediaResponse> {
     return this.post<DownloadMediaResponse>(
       "/chat/downloadaudio",
       request,
-      options
+      options,
     );
   }
 
@@ -232,23 +232,23 @@ export class ChatModule extends BaseClient {
    */
   async downloadDocument(
     request: DownloadMediaRequest,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<DownloadMediaResponse> {
     return this.post<DownloadMediaResponse>(
       "/chat/downloaddocument",
       request,
-      options
+      options,
     );
   }
 
   /**
-   * Delete (revoke for everyone) a message you sent.
-   * Phone is the chat JID/number the message belongs to — required by the server.
+   * Delete (revoke for everyone) a message you sent. Phone is the chat JID/number the message
+   * belongs to. The server requires it.
    */
   async deleteMessage(
     messageId: string,
     phone: string,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<DeleteMessageResponse> {
     const request: DeleteMessageRequest = { Phone: phone, Id: messageId };
     return this.post<DeleteMessageResponse>("/chat/delete", request, options);
@@ -259,12 +259,12 @@ export class ChatModule extends BaseClient {
    */
   async sendButtons(
     request: SendButtonsRequest,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<SendMessageResponse> {
     return this.post<SendMessageResponse>(
       "/chat/send/buttons",
       request,
-      options
+      options,
     );
   }
 
@@ -279,7 +279,7 @@ export class ChatModule extends BaseClient {
     sections?: ListSection[],
     footerText?: string,
     id?: string,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<SendMessageResponse> {
     const request: SendListRequest = {
       Phone: phone,
@@ -301,7 +301,7 @@ export class ChatModule extends BaseClient {
     header: string,
     options: string[],
     id?: string,
-    requestOptions?: RequestOptions
+    requestOptions?: RequestOptions,
   ): Promise<SendMessageResponse> {
     const request: SendPollRequest = {
       Group: groupJID,
@@ -312,7 +312,7 @@ export class ChatModule extends BaseClient {
     return this.post<SendMessageResponse>(
       "/chat/send/poll",
       request,
-      requestOptions
+      requestOptions,
     );
   }
 
@@ -323,7 +323,7 @@ export class ChatModule extends BaseClient {
     messageId: string,
     phone: string,
     newBody: string,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<SendMessageResponse> {
     const request: EditMessageRequest = {
       Id: messageId,
@@ -339,7 +339,7 @@ export class ChatModule extends BaseClient {
   async getChatHistory(
     chatJid: string,
     limit?: number,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<GetChatHistoryResponse> {
     const queryParams: string[] = [`chat_jid=${encodeURIComponent(chatJid)}`];
 
@@ -349,7 +349,7 @@ export class ChatModule extends BaseClient {
 
     return this.get<GetChatHistoryResponse>(
       `/chat/history?${queryParams.join("&")}`,
-      options
+      options,
     );
   }
 
@@ -360,7 +360,7 @@ export class ChatModule extends BaseClient {
     chat: string,
     sender: string,
     messageId: string,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<RequestUnavailableMessageResponse> {
     const request: RequestUnavailableMessageRequest = {
       chat,
@@ -370,7 +370,7 @@ export class ChatModule extends BaseClient {
     return this.post<RequestUnavailableMessageResponse>(
       "/chat/request-unavailable-message",
       request,
-      options
+      options,
     );
   }
 
@@ -380,7 +380,7 @@ export class ChatModule extends BaseClient {
   async archiveChat(
     jid: string,
     archive: boolean,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<ArchiveChatResponse> {
     const request: ArchiveChatRequest = { jid, archive };
     return this.post<ArchiveChatResponse>("/chat/archive", request, options);
@@ -391,12 +391,12 @@ export class ChatModule extends BaseClient {
    */
   async downloadSticker(
     request: DownloadMediaRequest,
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<DownloadMediaResponse> {
     return this.post<DownloadMediaResponse>(
       "/chat/downloadsticker",
       request,
-      options
+      options,
     );
   }
 }

@@ -67,8 +67,8 @@ export type WebhookEvent = keyof typeof WebhookEventType;
 
 export interface SetWebhookRequest {
   /**
-   * Webhook URL. Decoded from the `webhookurl` key by current WuzAPI
-   * servers — older servers read `webhook`.
+   * Webhook URL. Decoded from the `webhookurl` key by current WuzAPI servers. Older servers read
+   * `webhook`.
    */
   webhookurl: string;
   events: (WebhookEvent | string)[];
@@ -130,22 +130,25 @@ export interface WebhookPayload<T = unknown> extends WebhookPayloadBase<T> {
 // Specific webhook payload types for different media delivery modes
 
 // S3 only delivery
-export interface S3OnlyWebhookPayload<T = unknown>
-  extends WebhookPayloadBase<T> {
+export interface S3OnlyWebhookPayload<
+  T = unknown,
+> extends WebhookPayloadBase<T> {
   s3: S3MediaInfo;
 }
 
 // Base64 only delivery
-export interface Base64OnlyWebhookPayload<T = unknown>
-  extends WebhookPayloadBase<T> {
+export interface Base64OnlyWebhookPayload<
+  T = unknown,
+> extends WebhookPayloadBase<T> {
   base64: string;
   mimeType: string;
   fileName: string;
 }
 
 // Both S3 and Base64 delivery
-export interface BothMediaWebhookPayload<T = unknown>
-  extends WebhookPayloadBase<T> {
+export interface BothMediaWebhookPayload<
+  T = unknown,
+> extends WebhookPayloadBase<T> {
   s3: S3MediaInfo;
   base64: string;
   mimeType: string;
@@ -679,8 +682,7 @@ export interface PairPasskeyErrorWebhookEvent {
 export type QRWebhookPayload = AnyWebhookPayload<QRWebhookEvent> & {
   qrCodeBase64: string; // QR code as base64 data URL
 };
-export type QRTimeoutWebhookPayload =
-  AnyWebhookPayload<QRTimeoutWebhookEvent>;
+export type QRTimeoutWebhookPayload = AnyWebhookPayload<QRTimeoutWebhookEvent>;
 export type ConnectedWebhookPayload = AnyWebhookPayload<ConnectedWebhookEvent>;
 export type ReadReceiptWebhookPayload =
   AnyWebhookPayload<ReadReceiptWebhookEvent>;
@@ -712,7 +714,7 @@ export interface WebhookEventMap {
 
 // Type-safe webhook handler function type
 export type WebhookEventHandler<T extends keyof WebhookEventMap> = (
-  payload: AnyWebhookPayload<WebhookEventMap[T]>
+  payload: AnyWebhookPayload<WebhookEventMap[T]>,
 ) => void | Promise<void>;
 
 // Union type for all specific webhook payloads
@@ -731,35 +733,35 @@ export type SpecificWebhookPayload =
 // Type guard to check if payload is a specific webhook event type
 export function isWebhookEventType<T extends keyof WebhookEventMap>(
   payload: WebhookPayloadBase,
-  eventType: T
+  eventType: T,
 ): payload is AnyWebhookPayload<WebhookEventMap[T]> {
   return payload.type === eventType;
 }
 
 // Helper type guards
 export function hasS3Media(
-  payload: WebhookPayloadBase
+  payload: WebhookPayloadBase,
 ): payload is S3OnlyWebhookPayload | BothMediaWebhookPayload {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return !!(payload as any).s3;
 }
 
 export function hasBase64Media(
-  payload: WebhookPayloadBase
+  payload: WebhookPayloadBase,
 ): payload is Base64OnlyWebhookPayload | BothMediaWebhookPayload {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return !!(payload as any).base64;
 }
 
 export function hasBothMedia(
-  payload: WebhookPayloadBase
+  payload: WebhookPayloadBase,
 ): payload is BothMediaWebhookPayload {
   return hasS3Media(payload) && hasBase64Media(payload);
 }
 
 // Helper type guard to check if payload has token (all webhook payloads should)
 export function isValidWebhookPayload(
-  payload: unknown
+  payload: unknown,
 ): payload is WebhookPayloadBase {
   return (
     typeof payload === "object" &&
@@ -793,7 +795,7 @@ export function isValidWebhookPayload(
  * ```
  */
 export function discoverMessageType(
-  message: WebhookGenericMessage
+  message: WebhookGenericMessage,
 ): MessageType {
   if (!message) return MessageType.UNKNOWN;
 
