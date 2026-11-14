@@ -14,7 +14,7 @@ Package manager is **bun** (`packageManager: bun@1.3.8`). Use `bun run`, not `np
 
 ```bash
 bun install
-bun run lint          # eslint src --ext .ts,.tsx
+bun run lint          # oxlint src
 bun run lint:fix
 bun run typecheck     # tsc --noEmit — the primary correctness gate
 bun run test          # bun check_response_handling.ts
@@ -67,7 +67,7 @@ Prefer discriminated unions and mapped types over loose records; `UserModule.set
 
 ### Build
 
-Vite library mode, **CJS output only**, with `axios` external and sourcemaps on. `vite-plugin-dts` emits declarations. Module entry points are derived by reading `src/modules/` at config time, so a new module gets its deep-import path automatically — the list used to be hand-maintained and had silently drifted. The three non-module entries (`index`, `client`, `wuzapi-client`) and `types/index` are still listed explicitly.
+Vite library mode, **CJS output only**, with `axios` external and sourcemaps on. Vite writes the JavaScript and its source maps, then `tsc -p tsconfig.build.json` writes the declarations (one `.d.ts` per source file; `vite-plugin-dts` cannot run on TypeScript 7). Module entry points are derived by reading `src/modules/` at config time, so a new module gets its deep-import path automatically — the list used to be hand-maintained and had silently drifted. The three non-module entries (`index`, `client`, `wuzapi-client`) and `types/index` are still listed explicitly.
 
 Note `package.json` maps both `import` and `require` to the same CJS `dist/index.js`, and `dist/` is gitignored (built at publish time).
 
@@ -87,9 +87,9 @@ Adding a whole new module additionally requires exporting it from `src/index.ts`
 
 - **Imports use explicit `.js` extensions** even in `.ts` source (`from "../types/common.js"`). Required by the module resolution setup — match it.
 - Method signatures favor primitives for simple endpoints (`setStatusText(body)`, `pairPhone(phone)`) and a request object for anything with more than ~2 fields (`sendText(request)`). Build the typed request struct inside the method.
-- `tsconfig` is strict with `noUnusedLocals` / `noUnusedParameters`. `@typescript-eslint/no-explicit-any` is a warning, but production code here has none — keep it that way.
+- `tsconfig` is strict with `noUnusedLocals` / `noUnusedParameters`. `typescript/no-explicit-any` is a warning in `.oxlintrc.json`, but production code here has none — keep it that way.
 - Debug logging goes through `src/utils/logger.ts` (the `debug` package, `wuzapi:*` namespaces), gated on `config.debug`. `DEBUG=wuzapi:* node app.js` at runtime.
-- ESLint 9 flat config in `eslint.config.mjs` is what actually runs; `.eslintrc.js` is a leftover legacy config.
+- The repo runs TypeScript 7 and oxlint. `.oxlintrc.json` extends `@gusnips/oxlint` and keeps the levels this repo had under ESLint: `no-undef`, `no-redeclare` and `no-unused-vars` (no `_` exemption) are errors; `no-explicit-any` and `explicit-function-return-type` are warnings; `no-empty-object-type` is off.
 
 ### Gotchas
 

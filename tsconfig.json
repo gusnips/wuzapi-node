@@ -27,7 +27,6 @@
   "include": [
     "src",
     "vite.config.ts",
-    "eslint.config.mjs",
     "check_response_handling.ts"
   ]
 }
