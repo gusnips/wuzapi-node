@@ -742,14 +742,14 @@ export function isWebhookEventType<T extends keyof WebhookEventMap>(
 export function hasS3Media(
   payload: WebhookPayloadBase,
 ): payload is S3OnlyWebhookPayload | BothMediaWebhookPayload {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line typescript/no-explicit-any
   return !!(payload as any).s3;
 }
 
 export function hasBase64Media(
   payload: WebhookPayloadBase,
 ): payload is Base64OnlyWebhookPayload | BothMediaWebhookPayload {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line typescript/no-explicit-any
   return !!(payload as any).base64;
 }
 

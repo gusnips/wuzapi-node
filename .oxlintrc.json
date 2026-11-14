@@ -1,0 +1,22 @@
+{
+  "extends": [
+    "./node_modules/@gusnips/oxlint/base.json"
+  ],
+  "plugins": [],
+  "rules": {
+    "no-undef": "error",
+    "no-redeclare": "error",
+    "no-unused-vars": [
+      "error",
+      {
+        "vars": "all",
+        "args": "after-used",
+        "caughtErrors": "all",
+        "ignoreRestSiblings": false
+      }
+    ],
+    "typescript/no-explicit-any": "warn",
+    "typescript/no-empty-object-type": "off",
+    "typescript/explicit-function-return-type": "warn"
+  }
+}

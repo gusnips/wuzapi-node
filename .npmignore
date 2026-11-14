@@ -10,8 +10,7 @@ examples/
 *~
 
 # Configuration files
-.eslintrc.*
-eslint.config.js
+.oxlintrc.json
 tsconfig.json
 vite.config.ts
 
